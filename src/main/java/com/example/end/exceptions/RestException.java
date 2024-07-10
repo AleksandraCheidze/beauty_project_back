@@ -1,13 +1,10 @@
 package com.example.end.exceptions;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-/**
- * 9/25/2023
- * education-center
- *
- * @author Marsel Sidikov (AIT TR)
- */
+
+@Getter
 public class RestException extends RuntimeException {
     private final HttpStatus status;
 
@@ -16,7 +13,4 @@ public class RestException extends RuntimeException {
         this.status = status;
     }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
 }

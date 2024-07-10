@@ -1,21 +1,19 @@
 package com.example.end.service.interfaces;
 
-import com.example.end.dto.BookingDto;
-import com.example.end.models.Booking;
+import com.example.end.dto.*;
 import com.example.end.models.BookingStatus;
-import com.example.end.models.Procedure;
 import com.example.end.models.User;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public interface BookingService {
-    Booking createBooking(BookingDto bookingDto, int userId, int procedureId);
+    BookingDto createBooking(NewBookingDto bookingDto);
 
-    void updateBookingStatus(int bookingId, BookingStatus status);
+    void updateBookingStatus(NewUpdateBookingDto bookingDto);
 
-    List<Booking> getBookingForUser(User user);
+    void cancelBooking(Long bookingId);
 
-    Booking createBooking(User user, Procedure procedure);
-
-    // Методы для управления бронированиями
+    List<BookingDto> findBookingsByUser(Long userId, BookingStatus status);
 }

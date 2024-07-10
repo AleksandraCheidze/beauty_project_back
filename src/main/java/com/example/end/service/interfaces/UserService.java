@@ -1,28 +1,67 @@
 package com.example.end.service.interfaces;
 
 
-import com.example.end.dto.UserDto;
+import com.example.end.dto.*;
 import com.example.end.models.User;
+
 import java.util.List;
 import java.util.Optional;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
-public interface UserService extends UserDetailsService {
-  User registerNewUser(UserDto userDto);
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-  Optional<User> findByUsername(String username);
+@Service
+public interface UserService {
 
-  Optional<User> findByEmail(String email);
+    @Transactional
+    UserDto register(NewUserDto newUserDto);
 
-  List<User> getAllUsers();
+    UserDto authenticate(String email, String password);
+
+    UserDetailsDto getById(Long id);
+
+    void sendConfirmationEmails(User masterUser);
+
+    void validateEmail(String email);
+
+    User createUser(NewUserDto newUserDto);
 
 
-  User getUserByUsername(String username);
+    @jakarta.transaction.Transactional
+    UserDetailsDto updateUserDetails(Long userId, NewUserDetailsDto userDetailsDto);
 
-  Optional<User> findById(Long id);
+    UserDto getMasterById(Long id);
 
+    UserDto getClientById(Long id);
 
-  // void registerUser(UserDto userDto);
+    @jakarta.transaction.Transactional
+    void confirmMasterByEmail(String email);
+
+    List<UserDetailsDto> findUsersByCategoryId(Long categoryId);
+
+    Optional<User> findByEmail(String email);
+
+    Optional<User> loadUserByEmail(String email);
+
+    List<UserDetailsDto> getAllUsers();
+
+    void deleteById(Long id);
+
+    User findMasterUserByEmail(String email);
+
+    UserDetailsDto addProfileImage(Long userId, ProfileImageDto profileImageDto);
+
+    UserDetailsDto addPortfolioImages(Long userId, PortfolioImageDto portfolioImageDto);
+
+    void activateMasterUser(User masterUser);
+
+    List<UserDetailsDto> getAllMasters();
+
+    void sendMessageToAdmin(String email, String phone, String firstName, String lastName, String message);
+
+    // void sendMessageToAdmin(String subject, String message);
+
+    UserDto getUserById(Long currentUserId);
 
 }
 

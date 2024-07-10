@@ -1,55 +1,50 @@
 package com.example.end.controller;
 
-
+import com.example.end.controller.api.CategoryApi;
+import com.example.end.dto.CategoryDto;
+import com.example.end.dto.ProcedureDto;
+import com.example.end.exceptions.CategoryNotFoundException;
 import com.example.end.models.Category;
 import com.example.end.service.interfaces.CategoryService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/categories")
-public class CategoryController {
+public class CategoryController implements CategoryApi {
 
     private final CategoryService categoryService;
 
-    @Autowired
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
+    @Override
+    public List<CategoryDto> getAllCategories() {
+        return categoryService.getAllCategories();
+    }
+    @Override
+    public CategoryDto getCategoryById(Long id) {
+        return categoryService.getCategoryById(id);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(categories);
+    @Override
+    public CategoryDto createCategory(CategoryDto categoryDto) {
+        return categoryService.createCategory(categoryDto);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable int id) {
-        Optional<Category> category = categoryService.getCategoryById(id);
-        return ResponseEntity.of(category);
+    @Override
+    public CategoryDto updateCategory(Long id, CategoryDto updatedCategoryDto) {
+        return categoryService.updateCategory(id,updatedCategoryDto);
     }
-
-    @PostMapping
-    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
-        Category createdCategory = categoryService.createCategory(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable int id, @RequestBody Category category) {
-        Category updatedCategory = categoryService.updateCategory(id, category);
-        return ResponseEntity.ok(updatedCategory);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable int id) {
-        categoryService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
-    }
+   @Override
+   public CategoryDto deleteCategory(Long id) {
+    return categoryService.deleteCategory(id);
+}
 }
 

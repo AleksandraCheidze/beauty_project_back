@@ -1,75 +1,81 @@
 package com.example.end.service;
 
-
-import com.example.end.dto.BookingDto;
+import com.example.end.dto.*;
+import com.example.end.exceptions.ProcedureNotFoundException;
+import com.example.end.exceptions.UserNotFoundException;
+import com.example.end.mapping.BookingMapper;
 import com.example.end.models.Booking;
 import com.example.end.models.BookingStatus;
 import com.example.end.models.Procedure;
 import com.example.end.models.User;
 import com.example.end.repository.BookingRepository;
+import com.example.end.repository.ProcedureRepository;
+import com.example.end.repository.UserRepository;
 import com.example.end.service.interfaces.BookingService;
-import com.example.end.service.interfaces.ProcedureService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
-public class BookingServiceImpl implements BookingService {
+public class BookingServiceImpl  implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final UserServiceImpl userService;
-    private final ProcedureService procedureService;
+    private final BookingMapper bookingMapper;
+    private final ProcedureRepository procedureRepository;
+    private final UserRepository userRepository;
 
-    public BookingServiceImpl(BookingRepository bookingRepository, UserServiceImpl userService,
-                              ProcedureService procedureService) {
-        this.bookingRepository = bookingRepository;
-        this.userService = userService;
-        this.procedureService = procedureService;
+
+
+    @Override
+    public BookingDto createBooking(NewBookingDto bookingDto) {
+        User client = userRepository.findById(bookingDto.getClientId())
+                .orElseThrow(() -> new UserNotFoundException("Client not found"));
+
+        User master = userRepository.findById(bookingDto.getMasterId())
+                .orElseThrow(() -> new UserNotFoundException("Master not found"));
+
+        Procedure procedure = procedureRepository.findById(bookingDto.getProcedureId())
+                .orElseThrow(() -> new ProcedureNotFoundException("Procedure not found"));
+
+        Booking booking = new Booking();
+        booking.setDateTime(LocalDateTime.parse(bookingDto.getDateTime()));
+        booking.setClient(client);
+        booking.setMaster(master);
+        booking.setProcedure(procedure);
+        booking.setStatus(BookingStatus.CONFIRMED);
+
+        booking = bookingRepository.save(booking);
+
+        return bookingMapper.toDto(booking);
+    }
+
+    @Override
+    public void updateBookingStatus(NewUpdateBookingDto bookingDto) {
+        Booking existingBooking = bookingRepository.findById(bookingDto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Booking with ID " + bookingDto.getId() + " not found"));
+
+        existingBooking.setStatus(bookingDto.getStatus());
+        bookingRepository.save(existingBooking);
     }
 
 
     @Override
-    public Booking createBooking(BookingDto bookingDto, int userId, int procedureId) {
-        Optional<User> userOptional = userService.findById(userId);
-        Optional<Procedure> procedureOptional = Optional.ofNullable(procedureService.findById(procedureId));
-
-        if (userOptional.isPresent() && procedureOptional.isPresent()) {
-            User user = userOptional.get();
-            Procedure procedure = procedureOptional.get();
-
-            Booking booking = new Booking();
-            booking.setUser(user);
-            booking.setProcedure(procedure);
-            booking.setDateTime(bookingDto.getDateTime());
-            booking.setStatus(BookingStatus.PENDING);
-
-            return bookingRepository.save(booking);
-        } else {
-            // Обработка ошибки, если пользователь или процедура не найдены
-            return null;
-        }
-    }
-
-
-    @Override
-    public void updateBookingStatus(int bookingId, BookingStatus status) {
-        Optional<Booking> bookingOptional = bookingRepository.findById(bookingId);
-
-        bookingOptional.ifPresent(booking -> {
-            booking.setStatus(status);
-            bookingRepository.save(booking);
-        });
-    }
-
-
-    @Override
-    public List<Booking> getBookingForUser(User user) {
-        return null;
+    public void cancelBooking(Long bookingId) {
+        NewUpdateBookingDto bookingDto = new NewUpdateBookingDto();
+        bookingDto.setId(bookingId);
+        bookingDto.setStatus(BookingStatus.CANCELED);
+        updateBookingStatus(bookingDto);
     }
 
     @Override
-    public Booking createBooking(User user, Procedure procedure) {
-        return null;
-    }
+    public List<BookingDto> findBookingsByUser(Long userId, BookingStatus status) {
+        List<Booking> bookings = bookingRepository.findBookingsByUserIdAndStatus(userId, status);
+        return bookings.stream()
+                .map(bookingMapper::toDto)
+                .collect(Collectors.toList());
+}
 }

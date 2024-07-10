@@ -1,18 +1,30 @@
 package com.example.end.service.interfaces;
 
+import com.example.end.dto.NewProcedureDto;
+import com.example.end.dto.ProcedureByCategoryDto;
+import com.example.end.dto.ProcedureDto;
 import com.example.end.models.Procedure;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+
 @Service
 public interface ProcedureService {
 
-  Procedure createProcedure(String name, double price);
 
-  List<Procedure> getAllProcedures();
+  ProcedureDto createProcedure(NewProcedureDto procedureDto);
+
+  void update(ProcedureDto procedure);
+
+  ProcedureDto deleteById(Long id);
 
 
-    Procedure getProcedureById(Long procedureId);
-    // Другие методы
+  List<ProcedureDto> findAll();
+
+
+
+  ProcedureDto findById(Long id);
+
+    List<ProcedureByCategoryDto> findProceduresByCategoryId(Long categoryId);
 }
-

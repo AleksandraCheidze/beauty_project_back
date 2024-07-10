@@ -1,41 +1,49 @@
 package com.example.end.controller;
 
-import com.example.end.models.Procedure;
+
+import com.example.end.controller.api.ProcedureApi;
+import com.example.end.dto.NewProcedureDto;
+import com.example.end.dto.ProcedureByCategoryDto;
+import com.example.end.dto.ProcedureDto;
 import com.example.end.service.interfaces.ProcedureService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins="*")
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/procedures")
-public class ProcedureController {
+public class ProcedureController implements ProcedureApi {
 
   private final ProcedureService procedureService;
-
-
-  @Autowired
-  public ProcedureController(ProcedureService procedureService) {
-    this.procedureService = procedureService;
+  @Override
+  public ProcedureDto createProcedure(NewProcedureDto newProcedureDto) {
+    return procedureService.createProcedure(newProcedureDto);
+  }
+  @Override
+  public void update(ProcedureDto procedure) {
+  procedureService.update(procedure);
+  }
+  @Override
+  public ProcedureDto deleteById(Long id) {
+    return procedureService.deleteById(id);
   }
 
-  @PostMapping
-  public ResponseEntity<Procedure> createProcedure(@RequestParam String name, @RequestParam double price) {
-    // Создание новой процедуры
-    Procedure newProcedure = procedureService.createProcedure(name, price);
-
-    // Возвращение ответа с созданной процедурой
-    return ResponseEntity.ok(newProcedure);
+  @Override
+  public List<ProcedureDto> findAll() {
+  return procedureService.findAll();
   }
 
-  @GetMapping
-  public ResponseEntity<List<Procedure>> getAllProcedures() {
-    // Логика для получения списка всех процедур
-    List<Procedure> procedures = procedureService.getAllProcedures();
+  @Override
+  public ProcedureDto findById(Long id) {
+    return procedureService.findById(id);
+  }
 
-    // Возвращение ответа со списком процедур
-    return ResponseEntity.ok(procedures);
+  @Override
+  public List<ProcedureByCategoryDto> findProceduresByCategoryId(Long categoryId) {
+    return procedureService.findProceduresByCategoryId(categoryId);
   }
 }
 

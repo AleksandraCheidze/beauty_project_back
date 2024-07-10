@@ -1,22 +1,19 @@
 package com.example.end.service.interfaces;
 
 import com.example.end.dto.ReviewDto;
-import com.example.end.models.Review;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public interface ReviewService {
-    Review createReview(ReviewDto reviewDto);
 
-    List<Review> getAllReviews();
 
-    Optional<Review> getReviewById(int id);
+    ReviewDto addReview(ReviewDto reviewDto);
 
-    Optional<Review> updateReview(int id, ReviewDto reviewDto);
+    double getMasterRating(Long masterId);
 
-    boolean deleteReview(int id);
-    // Методы для управления отзывами
+    void deleteReview(Long reviewId);
+
+    List<ReviewDto> getReviewsByMaster(Long masterId);
 }

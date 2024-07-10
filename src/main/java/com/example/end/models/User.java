@@ -1,61 +1,94 @@
 package com.example.end.models;
 
-
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
 
-import javax.persistence.*;
-import javax.validation.constraints.Pattern;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-
 
 @Getter
 @Setter
 @ToString
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "users")
 public class User {
 
+    public enum Role {
+        ADMIN, CLIENT, MASTER
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-
-    @Column(name = "firstname")
-    @Pattern(regexp = "[A-Z][a-z]{3,}")
     private String firstName;
 
-    @Column(name = "lastname")
-    @Pattern(regexp = "[A-Z][a-z]{3,}")
     private String lastName;
+    
+    private String address;
 
-    @Column(name = "email")
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+    @Column(unique = true)
     private String email;
 
-    @Column(name = "is_active")
-    private boolean isActive;
+    private String phoneNumber;
 
-    @Column(name = "hash_password")
+    private boolean isActive = true;
+
+    @Column(nullable = false)
     private String hashPassword;
 
+    private String description;
+
+
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private Role role;
+
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "master", cascade = CascadeType.ALL)
+    private Set<Review> reviewsAsMaster;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private Set<Review> reviewsAsClient;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToMany
     @JoinTable(
-            name = "user_roles",
+            name = "user_categories",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
+            inverseJoinColumns = @JoinColumn(name = "category_id")
     )
+    private Set<Category> categories;
+
     @ToString.Exclude
-    private Set<Role> roles = new HashSet<>();
-    @OneToOne(mappedBy = "user")
-    private Cart cart;
+    @EqualsAndHashCode.Exclude
+    @ManyToMany
+    @JoinTable(
+            name = "user_procedures",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "procedure_id")
+    )
+    private Set<Procedure> procedures;
+
+    private  String profileImageUrl;
+
+    @ElementCollection
+    @CollectionTable(name = "user_portfolio_images", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "image_url")
+    private Set<String> portfolioImageUrls;
+
 
 
     @Override
